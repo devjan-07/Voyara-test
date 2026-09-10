@@ -2,12 +2,14 @@ package com.tourguide.web_based_tour_guide.controller;
 
 import com.tourguide.web_based_tour_guide.entity.Destination;
 import com.tourguide.web_based_tour_guide.service.DestinationService;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
-@RequestMapping("/destinations")
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/destinations")
 public class DestinationController {
 
     private final DestinationService destinationService;
@@ -16,119 +18,84 @@ public class DestinationController {
         this.destinationService = destinationService;
     }
 
-    // READ - Display all destinations
+    // CREATE
+    @PostMapping
+    public ResponseEntity<Destination> createDestination(
+            @RequestBody Destination destination) {
+
+        return new ResponseEntity<>(
+                destinationService.createDestination(destination),
+                HttpStatus.CREATED
+        );
+    }
+
+    // READ ALL
     @GetMapping
-    public String listDestinations(Model model) {
-        model.addAttribute(
-                "destinations",
+    public ResponseEntity<List<Destination>> getAllDestinations() {
+
+        return ResponseEntity.ok(
                 destinationService.getAllDestinations()
         );
-
-        return "destinations/list";
     }
 
-    // CREATE - Show form
-    @GetMapping("/new")
-    public String showCreateForm(Model model) {
-        model.addAttribute("destination", new Destination());
-
-        return "destinations/form";
-    }
-
-    // CREATE - Save destination
-    @PostMapping
-    public String createDestination(
-            @ModelAttribute("destination") Destination destination) {
-
-        destinationService.createDestination(destination);
-
-        return "redirect:/destinations";
-    }
-
-    // READ - View single destination
+    // READ BY ID
     @GetMapping("/{id}")
-    public String viewDestination(
-            @PathVariable Integer id,
-            Model model) {
+    public ResponseEntity<Destination> getDestinationById(
+            @PathVariable Integer id) {
 
-        model.addAttribute(
-                "destination",
+        return ResponseEntity.ok(
                 destinationService.getDestinationById(id)
         );
-
-        return "destinations/view";
     }
 
-    // UPDATE - Show edit form
-    @GetMapping("/{id}/edit")
-    public String showEditForm(
+    // UPDATE
+    @PutMapping("/{id}")
+    public ResponseEntity<Destination> updateDestination(
             @PathVariable Integer id,
-            Model model) {
+            @RequestBody Destination destination) {
 
-        model.addAttribute(
-                "destination",
-                destinationService.getDestinationById(id)
+        return ResponseEntity.ok(
+                destinationService.updateDestination(
+                        id,
+                        destination
+                )
         );
-
-        return "destinations/form";
-    }
-
-    // UPDATE - Save changes
-    @PostMapping("/{id}")
-    public String updateDestination(
-            @PathVariable Integer id,
-            @ModelAttribute("destination") Destination destination) {
-
-        destinationService.updateDestination(id, destination);
-
-        return "redirect:/destinations";
     }
 
     // DELETE
-    @PostMapping("/{id}/delete")
-    public String deleteDestination(@PathVariable Integer id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDestination(
+            @PathVariable Integer id) {
 
         destinationService.deleteDestination(id);
 
-        return "redirect:/destinations";
+        return ResponseEntity.noContent().build();
     }
 
-    // CREATIVE - Search
+    // SEARCH
     @GetMapping("/search")
-    public String searchDestinations(
-            @RequestParam(required = false) String keyword,
-            Model model) {
+    public ResponseEntity<List<Destination>> searchDestinations(
+            @RequestParam(required = false) String keyword) {
 
         if (keyword == null || keyword.trim().isEmpty()) {
-            model.addAttribute(
-                    "destinations",
+
+            return ResponseEntity.ok(
                     destinationService.getAllDestinations()
-            );
-        } else {
-            model.addAttribute(
-                    "destinations",
-                    destinationService.searchDestinations(keyword)
             );
         }
 
-        model.addAttribute("keyword", keyword);
-
-        return "destinations/list";
+        return ResponseEntity.ok(
+                destinationService.searchDestinations(keyword)
+        );
     }
 
-    // CREATIVE - Category filter
+    // FILTER BY CATEGORY
     @GetMapping("/category")
-    public String filterByCategory(
-            @RequestParam String category,
-            Model model) {
+    public ResponseEntity<List<Destination>> filterByCategory(
+            @RequestParam String category) {
 
-        model.addAttribute(
-                "destinations",
+        return ResponseEntity.ok(
                 destinationService.getDestinationsByCategory(category)
         );
-
-        model.addAttribute("selectedCategory", category);
-
-        return "destinations/list";
     }
 }

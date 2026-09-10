@@ -187,4 +187,28 @@ public class TourGuideService {
         return status.equalsIgnoreCase("ACTIVE") ||
                 status.equalsIgnoreCase("INACTIVE");
     }
+    // SEARCH GUIDES BY MINIMUM RATING
+    public List<TourGuide> searchGuidesByRating(
+            BigDecimal minRating) {
+
+        if (minRating == null) {
+            throw new IllegalArgumentException(
+                    "Minimum rating is required"
+            );
+        }
+
+        if (minRating.compareTo(BigDecimal.ZERO) < 0 ||
+                minRating.compareTo(new BigDecimal("5.00")) > 0) {
+
+            throw new IllegalArgumentException(
+                    "Rating must be between 0 and 5"
+            );
+        }
+
+        return tourGuideRepository
+                .findByAvailabilityStatusIgnoreCaseAndRatingGreaterThanEqual(
+                        "AVAILABLE",
+                        minRating
+                );
+    }
 }

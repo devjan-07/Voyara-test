@@ -4,6 +4,7 @@ import com.tourguide.web_based_tour_guide.entity.Destination;
 import com.tourguide.web_based_tour_guide.repository.DestinationRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -16,6 +17,9 @@ public class DestinationService {
     }
 
     public Destination createDestination(Destination destination) {
+
+        destination.setCreatedAt(LocalDateTime.now());
+
         return destinationRepository.save(destination);
     }
 
@@ -39,6 +43,10 @@ public class DestinationService {
         existing.setDescription(destination.getDescription());
         existing.setLocation(destination.getLocation());
         existing.setCategory(destination.getCategory());
+        existing.setEntranceFee(destination.getEntranceFee());
+        existing.setOpeningTime(destination.getOpeningTime());
+        existing.setClosingTime(destination.getClosingTime());
+        existing.setImageUrl(destination.getImageUrl());
         existing.setStatus(destination.getStatus());
 
         return destinationRepository.save(existing);
@@ -58,5 +66,4 @@ public class DestinationService {
     public List<Destination> getDestinationsByCategory(String category) {
         return destinationRepository.findByCategoryIgnoreCase(category);
     }
-
 }

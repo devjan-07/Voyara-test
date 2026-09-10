@@ -1,23 +1,28 @@
 package com.tourguide.web_based_tour_guide.dto;
 
-import org.hibernate.id.IntegralDataTypeHolder;
-
 public class LoginResponse {
 
     private String message;
     private Integer userId;
     private String fullName;
     private String role;
+    private String token;
 
     public LoginResponse() {
     }
 
-    public LoginResponse(String message, Integer userId,
-                         String fullName, String role) {
+    public LoginResponse(
+            String message,
+            Integer userId,
+            String fullName,
+            String role,
+            String token) {
+
         this.message = message;
         this.userId = userId;
         this.fullName = fullName;
         this.role = role;
+        this.token = token;
     }
 
     public String getMessage() {
@@ -50,5 +55,13 @@ public class LoginResponse {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

@@ -6,6 +6,7 @@ import com.tourguide.web_based_tour_guide.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -100,5 +101,33 @@ public class UserController {
         userService.deleteUser(id);
 
         return ResponseEntity.noContent().build();
+    }
+    // GET CURRENT PROFILE
+    @GetMapping("/profile")
+    public ResponseEntity<UserDTO> getMyProfile(
+            Authentication authentication) {
+
+        String email = authentication.getName();
+
+        return ResponseEntity.ok(
+                userService.getCurrentUserProfile(email)
+        );
+    }
+
+
+    // UPDATE CURRENT PROFILE
+    @PutMapping("/profile")
+    public ResponseEntity<UserDTO> updateMyProfile(
+            Authentication authentication,
+            @RequestBody User user) {
+
+        String email = authentication.getName();
+
+        return ResponseEntity.ok(
+                userService.updateCurrentUserProfile(
+                        email,
+                        user
+                )
+        );
     }
 }

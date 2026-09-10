@@ -12,23 +12,29 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.tourguide.web_based_tour_guide.security.JwtService;
+import com.tourguide.web_based_tour_guide.security.CustomUserDetails;
 
 import java.util.List;
 
 @Service
 public class UserService {
 
+    private final JwtService jwtService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    public UserService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder,
-                       AuthenticationManager authenticationManager) {
+    public UserService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            AuthenticationManager authenticationManager,
+            JwtService jwtService) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
     }
 
     // CREATE
@@ -167,7 +173,6 @@ public class UserService {
         return convertToDTO(savedUser);
     }
 
-    // LOGIN
     public LoginResponse loginUser(LoginRequest request) {
 
         try {
@@ -195,11 +200,64 @@ public class UserService {
                         )
                 );
 
+        // Generate JWT after successful authentication
+        String token = jwtService.generateToken(
+                new CustomUserDetails(user)
+        );
+
         return new LoginResponse(
                 "Login successful",
                 user.getUserId(),
                 user.getFullName(),
-                user.getRole()
+                user.getRole(),
+                token
         );
+    }
+
+    // GET CURRENT USER PROFILE
+    public UserDTO getCurrentUserProfile(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ApiException(
+                                "User not found",
+                                404
+                        ));
+
+        return convertToDTO(user);
+    }
+
+
+    // UPDATE CURRENT USER PROFILE
+    public UserDTO updateCurrentUserProfile(
+            String email,
+            User updatedUser) {
+
+        User existingUser = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ApiException(
+                                "User not found",
+                                404
+                        ));
+
+        if (updatedUser.getFullName() != null &&
+                !updatedUser.getFullName().isBlank()) {
+
+            existingUser.setFullName(
+                    updatedUser.getFullName()
+            );
+        }
+
+        if (updatedUser.getPhone() != null) {
+
+            existingUser.setPhone(
+                    updatedUser.getPhone()
+            );
+        }
+
+        User savedUser =
+                userRepository.save(existingUser);
+
+        return convertToDTO(savedUser);
     }
 }

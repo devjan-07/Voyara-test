@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -35,6 +36,17 @@ public class TourGuideController {
 
         return ResponseEntity.ok(
                 tourGuideService.getAllTourGuides()
+        );
+    }
+    // SEARCH GUIDES BY MINIMUM RATING
+    @GetMapping("/search")
+    public ResponseEntity<List<TourGuide>> searchGuides(
+            @RequestParam BigDecimal minRating) {
+
+        return ResponseEntity.ok(
+                tourGuideService.searchGuidesByRating(
+                        minRating
+                )
         );
     }
 
@@ -77,4 +89,5 @@ public class TourGuideController {
                 tourGuideService.getAvailableTourGuides()
         );
     }
+
 }
